@@ -1,0 +1,101 @@
+#
+# gobetween.toml 
+#
+# Website: http://gobetween.io
+# Documentation: https://github.com/yyyar/gobetween/wiki/Configuration
+#
+
+
+#
+# Logging configuration
+#
+[logging]
+level = "debug"   # "debug" | "info" | "warn" | "error"
+output = "stdout" # "stdout" | "stderr" | "/path/to/gobetween.log"
+
+#
+# Pprof profiler configuration
+#
+[profiler]
+enabled = false # false | true
+bind = ":6060"  # "host:port"
+
+#
+# REST API server configuration
+#
+[api]
+enabled = true  # true | false
+bind = ":8888"  # "host:port"
+cors = false    # cross-origin resource sharing
+
+#  [api.basic_auth]   # (optional) Enable HTTP Basic Auth
+#  login = "admin"    # HTTP Auth Login
+#  password = "1111"  # HTTP Auth Password
+
+#  [api.tls]                        # (optional) Enable HTTPS
+#  cert_path = "/path/to/cert.pem"  # Path to certificate
+#  key_path = "/path/to/key.pem"    # Path to key
+
+#
+# Metrics server configuration
+#
+[metrics]
+enabled = false # false | true
+bind = ":9284"  # "host:port"
+
+#
+# Default values for server configuration, may be overriden in [servers] sections.
+# All "duration" fields (for examole, postfixed with '_timeout') have the following format:
+# <int><duration> where duration can be one of 'ms', 's', 'm', 'h'.
+# Examples: "5s", "1m", "500ms", etc. "0" value means no limit
+#
+[defaults]
+max_connections = 2000           # Maximum simultaneous connections to the server
+client_idle_timeout = "0"        # Client inactivity duration before forced connection drop
+backend_idle_timeout = "0"       # Backend inactivity duration before forced connection drop
+backend_connection_timeout = "0" # Backend connection timeout (ignored in udp)
+
+#
+# Servers contains as many [server.<name>] sections as needed.
+#
+[servers]
+
+
+# ---------- tcp WS8888 ----------- #
+
+[servers.WS8888]
+protocol = "tcp"
+bind = "0.0.0.0:8001"
+balance = "roundrobin"
+# balance = "weight"
+
+max_connections = 500
+client_idle_timeout = "5m"
+backend_idle_timeout = "5m"
+backend_connection_timeout = "2s"
+
+  [servers.WS8888.discovery]
+  kind = "static"
+  static_list = [
+      "192.168.0.30:8888 weight=1",
+	  "192.168.0.30:8888 weight=1"
+  ]
+
+#[servers.WS8888.healthcheck]    # (optional)
+#interval = "2s"                 # (required) healthcheck running interval
+##timeout = "5s"                 # (required) max time for healthcheck to execute until mark as failed
+#fails = 1                       # (optional) consecutive number of checks that should fail, to mark backend as inactive
+#passes = 1                      # (optional) consecutive number of checks that should pass, to mark backend as active
+#kind = "ping"
+#ping_timeout_duration = "500ms"
+
+[servers.WS8888.healthcheck]    # (optional)
+interval = "5s"                 # (required) healthcheck running interval
+timeout = "5s"                  # (required) max time for healthcheck to execute until mark as failed
+fails = 1                       # (optional) consecutive number of checks that should fail, to mark backend as inactive
+passes = 1                      # (optional) consecutive number of checks that should pass, to mark backend as active
+kind = "exec"
+exec_command = '/etc/gobetween/conf/check.sh'        # (required) command to exec and variable-length arguments#  
+exec_expected_positive_output = "0"               # (required) expected output of command in case of success
+exec_expected_negative_output = "1"               # (required) expected output of command in case of failure
+
