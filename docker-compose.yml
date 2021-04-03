@@ -5,7 +5,7 @@ services:
   gobetween:
     restart: unless-stopped
     container_name: gobetween  
-    image: gobetween_alpine:alpine_3.13.1-0.8.0 # yyyar/gobetween
+    image: georgeosantiago/gobetween:alpine_3.13.1-0.8.0 # yyyar/gobetween
     hostname: gobetween
     domainname: gobetween
     ports:
